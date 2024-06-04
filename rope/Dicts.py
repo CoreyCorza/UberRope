@@ -6,6 +6,14 @@ DEFAULT_DATA = {
 'AddMarkerButtonIconOn':               './rope/media/add_marker_off.png',
 'AddMarkerButtonInfoText':             'ADD MARKER:\nAttaches a parameter marker to the current frame. Markers copy all parameter settings and apply them to all future frames, or until another marker is encountered.',
 'AddMarkerButtonState':           False,
+
+'SaveMarkerButtonDisplay':           'icon',
+'SaveMarkerButtonIconHover':            './rope/media/marker_save.png',    
+'SaveMarkerButtonIconOff':              './rope/media/marker_save.png',
+'SaveMarkerButtonIconOn':               './rope/media/marker_save.png',
+'SaveMarkerButtonInfoText':             'SAVE MARKERS:\nSave markers for this source video. The markers will be saved as a json file in the same folder as your source video.',
+'SaveMarkerButtonState':           False,
+
 'AudioDisplay':             'text', 
 'AudioInfoText':             'ENABLE REAL-TIME AUDIO:\nAdds audio from the input video during preview playback. If you are unable to maintain the input video frame rate, the audio will lag.',   
 'AudioState':               False,

@@ -1,28 +1,35 @@
+bg = 'black'
+main = '#1A1A1A' #Not as Dark Grey '#1A1A1A'
+main2 = '#151515' #Dark Grey '#151515'
+main3 = '#28282E' #Light Grey '#28282E'
+
+
+
 canvas_frame_label_1 = {  
-    'bg':                       '#17181A', 
-    'bd':       '0',
+    'bg':                       main2,
+    'bd':                       '0',
     'relief':                   'flat',
-        'highlightthickness':       '0'
+    'highlightthickness':       '0'
     } 
 
 canvas_frame_label_2 =      {  
-    'bg':               '#212126',
-    'bd':       '0',    
+    'bg':                       main2,
+    'bd':                       '0',    
     'relief':                   'flat',
-        'highlightthickness':       '0'
+    'highlightthickness':       '0'
     }  
     
 canvas_frame_label_3 = {  
-    'bg':                       '#28282e', 
-        'bd':       '0',
-        'relief':                   'flat',
-            'highlightthickness':       '0'
+    'bg':                       main,
+    'bd':                       '0',
+    'relief':                   'flat',
+    'highlightthickness':       '0'
     }
     
 info_label = {  
-    'bg':                       '#28282e', 
-    'fg':                       '#FFFFFF',     
-    'bd':       '5',
+    'bg':                       main2,
+    'fg':                       '#BCBCBC',
+    'bd':                        '5',
     'relief':                   'flat',
     'highlightthickness':       '0',
     'font':                     ("Segoe UI", 9),
@@ -31,27 +38,27 @@ info_label = {
     }
  
 text_1 = {  
-    'bg':                       '#17181A', 
-    'fg':                       '#D0D0D0', 
-    'activebackground':         '#212126', 
+    'bg':                       main2,
+    'fg':                       'white', 
+    'activebackground':         main2, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
     'font':                     ("Segoe UI", 9)
     }
 text_2 = {  
-    'bg':                       '#212126', 
+    'bg':                       main2,
     'fg':                       '#D0D0D0', 
-    'activebackground':         '#212126', 
+    'activebackground':         main2, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
     'font':                     ("Segoe UI", 9)
     }    
 text_3 = {  
-    'bg':                       '#28282e', 
-    'fg':                       '#D0D0D0', 
-    'activebackground':         '#212126', 
+    'bg':                       main,
+    'fg':                       '#979797', 
+    'activebackground':         main, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
@@ -61,8 +68,8 @@ text_3 = {
 
 
 option_slider_style = {  
-    'bg':                       '#919191',  #sliderbar color
-    'activebackground':         'white', 
+    'bg':                       main,
+    'activebackground':         main, 
     'highlightcolor':           'white',
     'highlightthickness':       '0',
     'relief':                   'flat',
@@ -98,36 +105,36 @@ entry_2 = {
     }     
 
 text_selection_off_3 = {  
-    'bg':                       '#28282e', 
+    'bg':                       main, 
     'fg':                       '#7A7A7A', 
-    'activebackground':         '#212126', 
+    'activebackground':         main, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
     'font':                     ("Segoe UI", 10)
     }
 text_selection_on_3 = {  
-    'bg':                       '#28282e', 
+    'bg':                       main, 
     'fg':                       '#FFFFFF', 
-    'activebackground':         '#212126', 
+    'activebackground':         main, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
     'font':                     ("Segoe UI", 10)
     }    
 text_selection_off_2 = {  
-    'bg':                       '#212126', 
+    'bg':                       main2, 
     'fg':                       '#7A7A7A', 
-    'activebackground':         '#212126', 
+    'activebackground':         main2, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
     'font':                     ("Segoe UI", 10)
     }    
 text_selection_on_2 = {  
-    'bg':                       '#212126', 
+    'bg':                       main2, 
     'fg':                       '#FFFFFF', 
-    'activebackground':         '#212126', 
+    'activebackground':         main2, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
@@ -136,9 +143,9 @@ text_selection_on_2 = {
     
 
 parameter_switch_3 = {  
-    'bg':                       '#28282e', 
+    'bg':                       main,
     'fg':                       '#FFFFFF', 
-    'activebackground':         '#212126', 
+    'activebackground':         main, 
     'activeforeground':         'white',
     'relief':                   'flat',
     'border':                   '0',
@@ -149,7 +156,7 @@ parameter_switch_3 = {
 
     
 canvas_bg = {  
-    'bg':                       '#090909', 
+    'bg':                       bg,
     'relief':                   'flat',
     'bd':                       '0',
     'highlightthickness':       '0'
@@ -162,33 +169,33 @@ icon = {
     
 
 frame_style_bg =      {  
-    'bg':               '#090909', 
+    'bg':               bg,
     'relief':           'flat',
     'bd':               '0'
     }      
      
 button_3 =    {  
-    'bg':               '#28282E', 
+    'bg':               main2,
     'fg':               '#FFFFFF', 
-    'activebackground': '#28282E', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
     'font':             ("Segoe UI", 10)
     }  
 button_2 =    {  
-    'bg':               '#212126', 
+    'bg':               main2, 
     'fg':               '#FFFFFF', 
-    'activebackground': '#212126', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
     'font':             ("Segoe UI", 10)
     } 
 button_1 =    {  
-    'bg':               '#17181A', 
+    'bg':               main2, 
     'fg':               '#FFFFFF', 
-    'activebackground': '#17181A', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -196,9 +203,9 @@ button_1 =    {
     } 
     
 button_inactive =    {  
-    'bg':               '#17181A', 
+    'bg':               main2, 
     'fg':               '#FFFFFF', 
-    'activebackground': '#17181A', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -206,9 +213,9 @@ button_inactive =    {
     }     
 
 button_active =    {  
-    'bg':               '#17181A', 
+    'bg':               main2, 
     'fg':               '#FFFFFF', 
-    'activebackground': '#17181A', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -217,9 +224,9 @@ button_active =    {
     
     
 media_button_off_3= {
-    'bg':               '#28282E', 
+    'bg':               main2,
     'fg':               '#7A7A7A', 
-    'activebackground': '#212126', 
+    'activebackground': main2, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -227,9 +234,9 @@ media_button_off_3= {
     }   
     
 media_button_on_3= {
-    'bg':               '#d10303', 
+    'bg':               '#4a57ee', 
     'fg':               '#FFFFFF', 
-    'activebackground': '#212126', 
+    'activebackground': '#4a57ee', 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -237,9 +244,9 @@ media_button_on_3= {
     }       
     
 ui_text_na_2 =    {  
-    'bg':               '#212126', 
+    'bg':               main,
     'fg':               '#7A7A7A', 
-    'activebackground': '#212126', 
+    'activebackground': main, 
     'activeforeground': 'white',
     'relief':           'flat',
     'border':           '0',
@@ -247,15 +254,15 @@ ui_text_na_2 =    {
     } 
 
 timeline_canvas = {  
-    'bg':                       '#212126', 
+    'bg':                       main, 
     'relief':                   'flat',
     'bd':                       '0',
     'highlightthickness':       '0'
     }    
 
 donate_1 = {
-    'bg':               '#17181A', 
-    'fg':               'light goldenrod', 
+    'bg':               main, 
+    'fg':               '#7562ee', 
     'relief':           'flat',
     'border':           '0',
     'font':             ("Segoe UI Semibold", 10),
