@@ -1,2 +1,3 @@
-call conda activate Rope && python Rope.py 
+call venv\Scripts\activate.bat
+python Rope.py 
 pause
