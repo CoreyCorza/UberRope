@@ -14,3 +14,4 @@ torchaudio==2.0.2
 tqdm
 ftfy
 regex
+customtkinter
