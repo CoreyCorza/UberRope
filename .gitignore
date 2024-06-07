@@ -1,3 +1,6 @@
+# Ignore files
+data.json
+
 # Ignore folders
 models/
 venv/
