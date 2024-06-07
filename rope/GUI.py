@@ -25,7 +25,92 @@ from skimage import transform as trans
 from torchvision.transforms import v2
 
 import inspect #print(inspect.currentframe().f_back.f_code.co_name, 'resize_image')
+from platform import system
 
+# Face Landmarks
+class FaceLandmarks:
+    def __init__(self, widget = {}, parameters = {}, add_action = {}):
+        self.data = {}
+        self.widget = widget
+        self.parameters = parameters
+        self.add_action = add_action
+
+    def add_landmarks(self, frame_number, face_id, landmarks):
+        if frame_number not in self.data:
+            self.data[frame_number] = {}
+        self.data[frame_number][face_id] = landmarks
+
+    def get_landmarks(self, frame_number, face_id):
+        return self.data.get(frame_number, {}).get(face_id, None)
+
+    def get_all_landmarks_for_frame(self, frame_number):
+        return self.data.get(frame_number, {})
+
+    def reset_landmarks_for_face_id(self, frame_number, face_id):
+        if frame_number in self.data:
+            landmarks = self.data.get(frame_number, {}).get(face_id, None)
+            if landmarks is not None:
+                landmarks = [(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)]
+    
+    def remove_all_landmarks_for_frame(self, frame_number):
+        if frame_number in self.data:
+            self.data[frame_number] = {}
+        
+    def remove_all_data(self):
+        self.data = {}
+
+    def apply_landmarks_to_widget_and_parameters(self, frame_number, face_id):
+        if self.widget and self.parameters and self.add_action:
+            landmarks = self.data.get(frame_number, {}).get(face_id, None)
+            if landmarks is not None:
+                self.widget['FaceIDSlider'].set(face_id, request_frame=False)
+                self.parameters['FaceIDSlider'] = face_id
+                self.widget['EyeLeftXSlider'].set(landmarks[0][0], request_frame=False)
+                self.parameters['EyeLeftXSlider'] = landmarks[0][0]
+                self.widget['EyeLeftYSlider'].set(landmarks[0][1], request_frame=False)
+                self.parameters['EyeLeftYSlider'] = landmarks[0][1]
+                self.widget['EyeRightXSlider'].set(landmarks[1][0], request_frame=False)
+                self.parameters['EyeRightXSlider'] = landmarks[1][0]
+                self.widget['EyeRightYSlider'].set(landmarks[1][1], request_frame=False)
+                self.parameters['EyeRightYSlider'] = landmarks[1][1]
+                self.widget['NoseXSlider'].set(landmarks[2][0], request_frame=False)
+                self.parameters['NoseXSlider'] = landmarks[2][0]
+                self.widget['NoseYSlider'].set(landmarks[2][1], request_frame=False)
+                self.parameters['NoseYSlider'] = landmarks[2][1]
+                self.widget['MouthLeftXSlider'].set(landmarks[3][0], request_frame=False)
+                self.parameters['MouthLeftXSlider'] = landmarks[3][0]
+                self.widget['MouthLeftYSlider'].set(landmarks[3][1], request_frame=False)
+                self.parameters['MouthLeftYSlider'] = landmarks[3][1]
+                self.widget['MouthRightXSlider'].set(landmarks[4][0], request_frame=False)
+                self.parameters['MouthRightXSlider'] = landmarks[4][0]
+                self.widget['MouthRightYSlider'].set(landmarks[4][1], request_frame=False)
+                self.parameters['MouthRightYSlider'] = landmarks[4][1]
+                self.add_action('parameters', self.parameters)
+            else:
+                self.widget['FaceIDSlider'].set(0, request_frame=False)
+                self.parameters['FaceIDSlider'] = 1
+                self.widget['EyeLeftXSlider'].set(0, request_frame=False)
+                self.parameters['EyeLeftXSlider'] = 0
+                self.widget['EyeLeftYSlider'].set(0, request_frame=False)
+                self.parameters['EyeLeftYSlider'] = 0
+                self.widget['EyeRightXSlider'].set(0, request_frame=False)
+                self.parameters['EyeRightXSlider'] = 0
+                self.widget['EyeRightYSlider'].set(0, request_frame=False)
+                self.parameters['EyeRightYSlider'] = 0
+                self.widget['NoseXSlider'].set(0, request_frame=False)
+                self.parameters['NoseXSlider'] = 0
+                self.widget['NoseYSlider'].set(0, request_frame=False)
+                self.parameters['NoseYSlider'] = 0
+                self.widget['MouthLeftXSlider'].set(0, request_frame=False)
+                self.parameters['MouthLeftXSlider'] = 0
+                self.widget['MouthLeftYSlider'].set(0, request_frame=False)
+                self.parameters['MouthLeftYSlider'] = 0
+                self.widget['MouthRightXSlider'].set(0, request_frame=False)
+                self.parameters['MouthRightXSlider'] = 0
+                self.widget['MouthRightYSlider'].set(0, request_frame=False)
+                self.parameters['MouthRightYSlider'] = 0
+                self.add_action('parameters', self.parameters)
+#
 
 class GUI(tk.Tk):
     def __init__(self, models):  
@@ -107,20 +192,20 @@ class GUI(tk.Tk):
                             }   
         self.source_faces = [] 
         
-        #region [#111111b4] 
+        #region [#111111b4]
 
         script_dir = os.path.dirname(__file__)
         icon_path = os.path.join(script_dir, 'media', 'rope.ico')
-        if os.path.exists(icon_path):
-            self.iconbitmap(icon_path)
-            
+        if system() != 'Linux':
+            if os.path.exists(icon_path):
+                self.iconbitmap(icon_path)
+
         #endregion
-            
-        #region [#131710b4] 
-        
+
+        #region [#131710b4]
+
         # Keyboard Shortcuts
         self.widget = {}
-        
 
         def load_shortcuts_from_json():
             try:
@@ -201,34 +286,34 @@ class GUI(tk.Tk):
 
     def toggle_and_update(self, switch_name, parameter_name):
         self.widget[f"{switch_name}Switch"].set(not self.widget[f"{switch_name}Switch"].get())
-        
+
 
     #endregion
 
 
         # self.bind("<Return>", lambda event: self.focus_set())
-        
-        
+
+
 #####
     def create_gui(self):
 
         #region [#111111b4]
-         
+
         # v_f_frame == self.layer['InputVideoFrame']
-        
+
         self.configure(bg=style.bg)
         ctk.set_appearance_mode("dark")
-        
+
         global tmp
         tmp = ctk.CTkFrame(self, border_width=0, fg_color=style.main, bg_color=style.bg)
         tmp.grid(row=1, column=0, sticky='NEWS', padx=0, pady=0)
         tmp.grid_forget()
-        
+
         #endregion
-        
-        
-        #region [#111111b4] 
-        
+
+
+        #region [#111111b4]
+
         def vidupdate():
             self.resize_image()
 
@@ -241,8 +326,8 @@ class GUI(tk.Tk):
             else:
                 self.layer['InputVideoFrame'].grid_forget()
                 v_f_frame.grid_forget()
-                self.after(10, vidupdate) 
-                
+                self.after(10, vidupdate)
+
         #Hide/Unhide Faces Panel
         def collapse_faces_panel():
             current_state = self.collapse_bottom.get()
@@ -259,32 +344,32 @@ class GUI(tk.Tk):
         def collapse_params_panel():
             current_state = self.collapse_params.get()
             if current_state:
-                
-                self.layer['parameter_frame'].grid(row=0, column=2, sticky='NEWS', pady=0, padx=0)                
-                self.after(10, vidupdate) 
+
+                self.layer['parameter_frame'].grid(row=0, column=2, sticky='NEWS', pady=0, padx=0)
+                self.after(10, vidupdate)
             else:
                 self.layer['parameter_frame'].grid_forget()
-                self.after(10, vidupdate) 
-                
+                self.after(10, vidupdate)
+
         #Keyboard Shortcuts
         def keyboard_shortcuts():
             current_state = self.collapse_keyboardshortcuts.get()
             if current_state:
                 ks_frame.grid(row=0, column=0, sticky='NEWS', padx=0, pady=(0,0))
-                self.after(10, vidupdate) 
+                self.after(10, vidupdate)
                 self.layer['InputVideoFrame'].grid_forget()
-                self.after(10, vidupdate) 
+                self.after(10, vidupdate)
                 self.checkbox.deselect()
             else:
                 ks_frame.grid_forget()
                 v_f_frame.grid_forget()
                 self.after(10, vidupdate) 
                 self.layer['InputVideoFrame'].grid(row=0, column=0, sticky='NEWS', padx=0, pady=(0,0))
-                self.after(10, vidupdate) 
+                self.after(10, vidupdate)
                 self.checkbox.select()
-        
+
         #endregion
-        
+
 
         # 1 x 3 Top level grid
         self.grid_columnconfigure(0, weight=1)  
@@ -299,7 +384,7 @@ class GUI(tk.Tk):
         top_frame.grid(row=0, column=0, sticky='NEWS', padx=1, pady=1)   
         top_frame.grid_columnconfigure(0, weight=1) 
         top_frame.grid_columnconfigure(1, weight=0) 
-        
+
         # Middle Frame
         middle_frame = tk.Frame( self, style.frame_style_bg)
         middle_frame.grid(row=1, column=0, sticky='NEWS', padx=0, pady=0)
@@ -314,20 +399,20 @@ class GUI(tk.Tk):
         middle_frame.grid_columnconfigure(3, weight=0)         
 
         #region [#131710b4] 
-        
+
         global v_f_frame
         v_f_frame = ctk.CTkFrame(middle_frame, height = 42, border_width=0, fg_color=style.main) 
         v_f_frame.grid(row=0, column=0, sticky='NEWS', padx=0, pady=(0,0)) 
-        
+
 
         y=0
         x=10
         global ks_frame
-        ks_frame = ctk.CTkFrame(middle_frame, height = 42, width=250, border_width=0, fg_color=style.main, background_corner_colors=(style.main,style.main,style.main,style.main)) 
-        ks_frame.grid(row=0, column=0, sticky='NEWS', padx=0, pady=(0,0)) 
+        ks_frame = ctk.CTkFrame(middle_frame, height = 42, width=250, border_width=0, fg_color=style.main, background_corner_colors=(style.main,style.main,style.main,style.main))
+        ks_frame.grid(row=0, column=0, sticky='NEWS', padx=0, pady=(0,0))
         ks_frame.grid_forget()
-        
-        
+
+
         def load_shortcuts_from_json():
             try:
                 with open("shortcuts.json", "r") as json_file:
@@ -410,7 +495,7 @@ class GUI(tk.Tk):
             # Save the current shortcuts to JSON
             save_shortcuts_to_json(shortcuts)
             update_key_actions()
-            
+
         # Create save button with lambda function
         save_ks_button = ctk.CTkButton(ks_frame, text="Save Shortcuts", command=save_shortcuts, width=150, height=15, corner_radius=3, fg_color=style.main2, hover_color=style.main3)
         save_ks_button.place(x=40, y=20)
@@ -427,31 +512,30 @@ class GUI(tk.Tk):
 
         # Bottom Frame
         bottom_frame = tk.Frame( self, style.canvas_frame_label_1)
-        bottom_frame.grid(row=2, column=0, sticky='NEWS', padx=1, pady=1) 
-        bottom_frame.grid_columnconfigure(0, minsize=100) 
+        bottom_frame.grid(row=2, column=0, sticky='NEWS', padx=1, pady=1)
+        bottom_frame.grid_columnconfigure(0, minsize=100)
         bottom_frame.grid_columnconfigure(1, weight=1)
         bottom_frame.grid_columnconfigure(2, minsize=100)
- 
-  
-####### Top Frame    
+
+####### Top Frame
       # Left
         # Label
         self.layer['topleft'] = tk.Frame(top_frame, style.canvas_frame_label_1, height = 42)
-        self.layer['topleft'].grid(row=0, column=0, sticky='NEWS', pady=0) 
+        self.layer['topleft'].grid(row=0, column=0, sticky='NEWS', pady=0)
 
         # Buttons
-        self.widget['StartButton'] = GE.Button(self.layer['topleft'], 'StartRope', 1, self.load_all, None, 'control', 10, 9, width=200)        
-        self.widget['OutputFolderButton'] = GE.Button(self.layer['topleft'], 'OutputFolder', 1, self.select_save_video_path, None, 'control', x=240, y=1, width=190)     
+        self.widget['StartButton'] = GE.Button(self.layer['topleft'], 'StartRope', 1, self.load_all, None, 'control', 10, 9, width=200)
+        self.widget['OutputFolderButton'] = GE.Button(self.layer['topleft'], 'OutputFolder', 1, self.select_save_video_path, None, 'control', x=240, y=1, width=190)
         self.output_videos_text = GE.Text(self.layer['topleft'], '', 1, 240, 20, 190, 20)
-        
+
       # Right
         self.layer['topright'] = tk.Frame(top_frame, style.canvas_frame_label_1, height=42, width=413)
-        self.layer['topright'].grid(row=0, column=1, sticky='NEWS', pady=0) 
+        self.layer['topright'].grid(row=0, column=1, sticky='NEWS', pady=0)
         self.control['ClearVramButton'] = GE.Button(self.layer['topright'], 'ClearVramButton', 1, self.clear_mem, None, 'control', x=5, y=9, width=85, height=20)
         self.static_widget['vram_indicator'] = GE.VRAM_Indicator(self.layer['topright'], 1, 300, 20, 100, 11)
-        
-        #region [#111111b4] 
-        
+
+        #region [#111111b4]
+
         ##Button - Hide/Unhide Faces Panel
         self.checkbox = ctk.CTkCheckBox(self.layer['topleft'], text="Input Panel", text_color='#B0B0B0', command=input_panel_checkbox, onvalue=True, offvalue=False, checkbox_width=18, checkbox_height=18, border_width=0, hover_color='#303030', fg_color=style.main)
         self.checkbox.place(x=500, y=10)
@@ -467,8 +551,8 @@ class GUI(tk.Tk):
         self.collapse_keyboardshortcuts = ctk.CTkCheckBox(self.layer['topleft'], text="Keyboard Shortcuts",text_color='#B0B0B0', command=keyboard_shortcuts, onvalue=True, offvalue=False, checkbox_width=18,checkbox_height=18,border_width=0,hover_color='#303030',fg_color=style.main)
         self.collapse_keyboardshortcuts.place(x=840, y=10)
         #endregion
-        
-####### Middle Frame  
+
+####### Middle Frame
 
     ### Videos and Faces
         self.layer['InputVideoFrame'] = tk.Frame(middle_frame, style.canvas_frame_label_3)
@@ -642,7 +726,7 @@ class GUI(tk.Tk):
         self.widget['NextMarkerButton'] = GE.Button(right_playframe, 'NextMarkerButton', 2, self.update_marker, 'next', 'control', x=75, y=5, width=20)
         # self.widget['StopMarkerButton'] = GE.Button(right_playframe, 'StopMarkerButton', 2, self.update_marker, 'stop', 'control', x=100, y=5, width=20)
         self.widget['SaveMarkerButton'] = GE.Button(right_playframe, 'SaveMarkerButton', 2, self.save_markers_json, None, 'control', x=95, y=5, width=20)
-        
+
     # Images
         self.layer['image_controls'] = tk.Frame(self.layer['preview_column'], style.canvas_frame_label_2, height=80)
         self.layer['image_controls'].grid(row=2, column=0, rowspan=2, sticky='NEWS', pady=0)
@@ -751,7 +835,7 @@ class GUI(tk.Tk):
         self.layer['parameters_canvas'] = tk.Canvas(self.layer['parameter_frame'], style.canvas_frame_label_3, bd=0, width=width)
         self.layer['parameters_canvas'].grid(row=1, column=0, sticky='NEWS', pady=0, padx=0)
 
-        self.layer['parameters_frame'] = tk.Frame(self.layer['parameters_canvas'], style.canvas_frame_label_3, bd=0, width=width, height=1150)
+        self.layer['parameters_frame'] = tk.Frame(self.layer['parameters_canvas'], style.canvas_frame_label_3, bd=0, width=width, height=1300)
         self.layer['parameters_frame'].grid(row=0, column=0, sticky='NEWS', pady=0, padx=0)
 
         self.layer['parameters_canvas'].create_window(0, 0, window = self.layer['parameters_frame'], anchor='nw')
@@ -895,6 +979,12 @@ class GUI(tk.Tk):
         self.widget['DetectTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'DetectTypeTextSel', 'Detection Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62)
         row += row_delta
         self.widget['DetectScoreSlider'] = GE.Slider2(self.layer['parameters_frame'], 'DetectScoreSlider', 'Detect Score', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        
+        # Use Opal similarity
+        row += row_delta
+        self.widget['UseOpalSimilaritySwitch'] = GE.Switch2(self.layer['parameters_frame'], 'UseOpalSimilaritySwitch', 'Use Opal Similarity', 3, self.update_data, 'parameter', 398, 20, 1, row)
+        #
+        
         # Landmarks Detection
         row += top_border_delta
         self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
@@ -911,7 +1001,31 @@ class GUI(tk.Tk):
         row += top_border_delta
         self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
+
+        # Face Landmarks Position
+        self.widget['LandmarksPositionAdjSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'LandmarksPositionAdjSwitch', 'Landmarks Position Adjustments', 3, self.update_data, 'parameter', 398, 20, 1, row)
+        row += switch_delta
+        self.widget['FaceIDSlider'] = GE.Slider2(self.layer['parameters_frame'], 'FaceIDSlider', 'Face ID: ', 3, self.update_face_landmarks_data, 'parameter', 220, 20, 1, row, 0.62)
+        row += row_delta
+        self.widget['EyeLeftXSlider'] = GE.Slider2(self.layer['parameters_frame'], 'EyeLeftXSlider', 'Eye Left:   X', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 1, row, 0.60, 40)
+        self.widget['EyeLeftYSlider'] = GE.Slider2(self.layer['parameters_frame'], 'EyeLeftYSlider', 'Y', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 200, row, 0.60, 40)
+        row += row_delta    
+        self.widget['EyeRightXSlider'] = GE.Slider2(self.layer['parameters_frame'], 'EyeRightXSlider', 'Eye Right:   X', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 1, row, 0.60, 40)
+        self.widget['EyeRightYSlider'] = GE.Slider2(self.layer['parameters_frame'], 'EyeRightYSlider', 'Y', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 200, row, 0.60, 40)
+        row += row_delta
+        self.widget['NoseXSlider'] = GE.Slider2(self.layer['parameters_frame'], 'NoseXSlider', 'Nose:   X', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 1, row, 0.60, 40)
+        self.widget['NoseYSlider'] = GE.Slider2(self.layer['parameters_frame'], 'NoseYSlider', 'Y', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 200, row, 0.60, 40)
+        row += row_delta
+        self.widget['MouthLeftXSlider'] = GE.Slider2(self.layer['parameters_frame'], 'MouthLeftXSlider', 'Mouth Left:   X', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 1, row, 0.60, 40)
+        self.widget['MouthLeftYSlider'] = GE.Slider2(self.layer['parameters_frame'], 'MouthLeftYSlider', 'Y', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 200, row, 0.60, 40)
+        row += row_delta
+        self.widget['MouthRightXSlider'] = GE.Slider2(self.layer['parameters_frame'], 'MouthRightXSlider', 'Mouth Right: X', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 1, row, 0.59, 40)
+        self.widget['MouthRightYSlider'] = GE.Slider2(self.layer['parameters_frame'], 'MouthRightYSlider', 'Y', 3, self.update_face_landmarks_data, 'parameter', 200, 20, 200, row, 0.60, 40)
+        row += top_border_delta
+        self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
         #
+
         self.widget['RecordTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'RecordTypeTextSel', 'Record Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62)
         row += row_delta
         self.widget['VideoQualSlider'] = GE.Slider2(self.layer['parameters_frame'], 'VideoQualSlider', 'FFMPEG Quality', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
@@ -974,10 +1088,55 @@ class GUI(tk.Tk):
         self.donate_label.grid( row = 0, column = 2, sticky='NEWS')
         self.donate_label.bind("<Button-1>", lambda e: self.callback("https://www.paypal.com/donate/?hosted_button_id=Y5SB9LSXFGRF2"))
 
+        # Face Landmarks
+        self.face_landmarks = FaceLandmarks(self.widget, self.parameters, self.add_action)
+        self.add_action("face_landmarks", self.face_landmarks)
+        #
 
+    # Face Landmarks
+    def update_face_landmarks_data(self, mode, name, use_markers=False):
+        # print(inspect.currentframe().f_back.f_code.co_name,)
+        if mode=='parameter':
+            frame_number = self.video_slider.get()
+            face_id = self.widget['FaceIDSlider'].get()
+            parameter_value = self.widget[name].get()
 
+            landmarks = self.face_landmarks.get_landmarks(frame_number, face_id)
+            if landmarks is None:
+                landmarks = [(0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0)]
+                self.face_landmarks.add_landmarks(frame_number, face_id, landmarks)
 
+            match name:
+                case "EyeLeftXSlider":
+                    landmarks[0] = tuple((parameter_value, landmarks[0][1]))
+                case "EyeLeftYSlider":
+                    landmarks[0] = tuple((landmarks[0][0], parameter_value))
+                case "EyeRightXSlider":
+                    landmarks[1] = tuple((parameter_value, landmarks[1][1]))
+                case "EyeRightYSlider":
+                    landmarks[1] = tuple((landmarks[1][0], parameter_value))
+                case "NoseXSlider":
+                    landmarks[2] = tuple((parameter_value, landmarks[2][1]))
+                case "NoseYSlider":
+                    landmarks[2] = tuple((landmarks[2][0], parameter_value))
+                case "MouthLeftXSlider":
+                    landmarks[3] = tuple((parameter_value, landmarks[3][1]))
+                case "MouthLeftYSlider":
+                    landmarks[3] = tuple((landmarks[3][0], parameter_value))
+                case "MouthRightXSlider":
+                    landmarks[4] = tuple((parameter_value, landmarks[4][1]))
+                case "MouthRightYSlider":
+                    landmarks[4] = tuple((landmarks[4][0], parameter_value))
 
+            self.add_action("face_landmarks", self.face_landmarks)
+
+            self.face_landmarks.apply_landmarks_to_widget_and_parameters(frame_number, face_id)
+            
+            if use_markers:
+                self.add_action('get_requested_video_frame', frame_number)
+            else:
+                self.add_action('get_requested_video_frame_without_markers', frame_number)
+    #
 
     # Update the parameters or controls dicts and get a new frame
     def update_data(self, mode, name, use_markers=False):
@@ -1035,7 +1194,7 @@ class GUI(tk.Tk):
 
 
         # if self.focus_get() !=  self.widget['CLIPTextEntry'] and self.focus_get() != self.merged_embeddings_text:
-            
+
         #     #asd
         #     if self.video_loaded:
         #         frame = self.video_slider.get()
@@ -1070,7 +1229,7 @@ class GUI(tk.Tk):
         #             frame = 0
         #             self.video_slider.set(frame)
         #             self.add_action("get_requested_video_frame", frame)
-        
+
     def forward_one_frame(self):
         frame = self.video_slider.get()
         video_length = self.video_slider.get_length()
@@ -1079,7 +1238,7 @@ class GUI(tk.Tk):
             frame = video_length
         self.video_slider.set(frame)
         self.add_action("get_requested_video_frame", frame)
-    
+
     def back_one_frame(self):
         frame = self.video_slider.get()
         frame -= 1
@@ -1087,7 +1246,7 @@ class GUI(tk.Tk):
             frame = 0
         self.video_slider.set(frame)
         self.add_action("get_requested_video_frame", frame)
-        
+
     def preview_control(self, event):
         # print(event.char, event.keysym, event.keycode)
         # print(type(event))
@@ -1095,7 +1254,7 @@ class GUI(tk.Tk):
             event = event
         else:
             event = event.char
-   
+
 
         # if self.focus_get() != self.CLIP_name and self.focus_get() != self.me_name and self.parameters['ImgVidMode'] == 0:
 
@@ -1112,31 +1271,31 @@ class GUI(tk.Tk):
                 self.add_action("get_requested_video_frame", frame)
                 # self.parameter_update_from_marker(frame)
             elif event == 's':
-                frame -= 1 
+                frame -= 1
                 if frame < 0:
-                    frame = 0   
+                    frame = 0
                 self.video_slider.set(frame)
                 self.add_action("get_requested_video_frame", frame)
                 # self.parameter_update_from_marker(frame)
             elif event == 'd':
-                frame += 30 
+                frame += 30
                 if frame > video_length:
-                    frame = video_length  
+                    frame = video_length
                 self.video_slider.set(frame)
                 self.add_action("get_requested_video_frame", frame)
                 # self.parameter_update_from_marker(frame)
             elif event == 'a':
-                frame -= 30 
+                frame -= 30
                 if frame < 0:
                     frame = 0                  
                 self.video_slider.set(frame)
                 self.add_action("get_requested_video_frame", frame)
                 # self.parameter_update_from_marker(frame)
             elif event == 'q':
-                frame = 0                  
+                frame = 0
                 self.video_slider.set(frame)
                 self.add_action("get_requested_video_frame", frame)
-                # self.parameter_update_from_marker(frame)            
+                # self.parameter_update_from_marker(frame)
 
 
 # refactor - make sure files are closed
@@ -1359,8 +1518,6 @@ class GUI(tk.Tk):
                     img = cv2.imread(file)
 
                     if img is not None:
-                        # convert to RGB format
-                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                         img = torch.from_numpy(img.astype('uint8')).to('cuda')
 
                         pad_scale = 0.2
@@ -1384,14 +1541,14 @@ class GUI(tk.Tk):
                         except IndexError:
                             print('Image cropped too close:', file)
                         else:
-                            face_emb, cropped_image = self.models.run_recognize(img, kpss)
-                            # PIL follows RGB color convention and cropped image come in RGB format
-                            crop = torchvision.transforms.functional.to_pil_image(cropped_image)
-                            crop = crop.resize((85, 85))
+                            face_emb, cropped_image = self.models.run_recognize(img, kpss, self.parameters["UseOpalSimilaritySwitch"])
+                            crop = cv2.cvtColor(cropped_image.cpu().numpy(), cv2.COLOR_BGR2RGB)
+                            crop = cv2.resize(crop, (85, 85))
+
                             new_source_face = self.source_face.copy()
                             self.source_faces.append(new_source_face)
 
-                            self.source_faces[-1]["Image"] = ImageTk.PhotoImage(image=crop)
+                            self.source_faces[-1]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
                             self.source_faces[-1]["Embedding"] = face_emb
                             self.source_faces[-1]["TKButton"] = tk.Button(self.source_faces_canvas, style.media_button_off_3, image=self.source_faces[-1]["Image"], height=90, width=90)
                             self.source_faces[-1]["ButtonState"] = False
@@ -1424,7 +1581,7 @@ class GUI(tk.Tk):
                 #     face_kps = kpss[i]
 
 
-                face_emb, cropped_img = self.models.run_recognize(img, face_kps)
+                face_emb, cropped_img = self.models.run_recognize(img, face_kps, self.parameters["UseOpalSimilaritySwitch"])
                 ret.append([face_kps, face_emb, cropped_img])
 
         except Exception:
@@ -1451,8 +1608,7 @@ class GUI(tk.Tk):
 
                     # If we dont find any existing simularities, it means that this is a new face and should be added to our found faces
                     if not found:
-                        crop = torchvision.transforms.functional.to_pil_image(face[2])
-                        crop = crop.resize((82, 82))
+                        crop = cv2.resize(face[2].cpu().numpy(), (82, 82))
 
                         new_target_face = self.target_face.copy()
                         self.target_faces.append(new_target_face)
@@ -1461,7 +1617,7 @@ class GUI(tk.Tk):
                         self.target_faces[last_index]["TKButton"] = tk.Button(self.found_faces_canvas, style.media_button_off_3, height = 86, width = 86)
                         self.target_faces[last_index]["TKButton"].bind("<MouseWheel>", self.target_faces_mouse_wheel)
                         self.target_faces[last_index]["ButtonState"] = False
-                        self.target_faces[last_index]["Image"] = ImageTk.PhotoImage(image=crop)
+                        self.target_faces[last_index]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
                         self.target_faces[last_index]["Embedding"] = face[1]
                         self.target_faces[last_index]["EmbeddingNumber"] = 1
 
@@ -1699,7 +1855,7 @@ class GUI(tk.Tk):
         self.image_loaded = False
         self.video_loaded = False
         self.clear_faces()
-
+        
         if media_type == 'Video':
             self.video_slider.set(0)
             self.add_action("load_target_video", media_file)
@@ -1728,16 +1884,15 @@ class GUI(tk.Tk):
         self.layer['markers_canvas'].delete('all')
         self.markers = []
         self.stop_marker = []
-        
-        #region [#111111b4] 
-        
+
+        #region [#111111b4]
+
         self.load_markers_json()
         self.add_action("update_markers_canvas", self.markers)
-        
-        #endregion
-        
-        self.add_action("markers", self.markers)
 
+        #endregion
+
+        self.add_action("markers", self.markers)
 
 
     # @profile
@@ -1925,13 +2080,13 @@ class GUI(tk.Tk):
 
     def toggle_rec_video(self):
         # Play button must be off to enable record button
-        
-        #region [#111111b4] 
-        
+
+        #region [#111111b4]
+
         self.save_markers_json()
-        
+
         #endregion
-        
+
         if not self.widget['TLPlayButton'].get():
             self.widget['TLRecButton'].toggle_button()
 
@@ -2202,10 +2357,10 @@ class GUI(tk.Tk):
                 marker['icon_ref'] = self.layer['markers_canvas'].create_line(position,0, position, 15, fill='light goldenrod')
 
 
-    #region [#111111b4] 
-    
+    #region [#111111b4]
+
     def save_markers_json(self):
-        
+
         if len(self.markers) == 0 or len(self.media_file_name) == 0:
             return
         json_file_path = os.path.join(self.json_dict["source videos"], self.media_file_name[0] + "_markers.json")
@@ -2232,7 +2387,7 @@ class GUI(tk.Tk):
             marker['icon_ref'] = self.layer['markers_canvas'].create_line(position,0, position, 15, fill='light goldenrod')
 
     #endregion
-                
+
     def toggle_stop(self):
         if self.stop_marker == self.video_slider.self.timeline_position:
             self.stop_marker = []
@@ -2242,7 +2397,7 @@ class GUI(tk.Tk):
             self.video_slider_canvas.delete(self.stop_image)
             self.stop_marker = self.video_slider.self.timeline_position
             self.add_action('set_stop', self.stop_marker)
-        
+
             width = self.video_slider_canvas.winfo_width()-30
             position = 15+int(width*self.video_slider.self.timeline_position/self.video_slider.configure('to')[4])  
             self.stop_image = self.video_slider_canvas.create_image(position, 30, image=self.stop_marker_icon)

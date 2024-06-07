@@ -87,26 +87,26 @@ class Models():
 
         if detect_mode=='Retinaface':
             if not self.retinaface_model:
-                self.retinaface_model = onnxruntime.InferenceSession('.\models\det_10g.onnx', providers=self.providers)
+                self.retinaface_model = onnxruntime.InferenceSession('./models/det_10g.onnx', providers=self.providers)
 
             bboxes, kpss = self.detect_retinaface(img, max_num=max_num, score=score, use_landmark_detection=use_landmark_detection, landmark_detect_mode=landmark_detect_mode, landmark_score=landmark_score, from_points=from_points)
 
         elif detect_mode=='SCRDF':
             if not self.scrdf_model:
-                self.scrdf_model = onnxruntime.InferenceSession('.\models\scrfd_2.5g_bnkps.onnx', providers=self.providers)
+                self.scrdf_model = onnxruntime.InferenceSession('./models/scrfd_2.5g_bnkps.onnx', providers=self.providers)
 
             bboxes, kpss = self.detect_scrdf(img, max_num=max_num, score=score, use_landmark_detection=use_landmark_detection, landmark_detect_mode=landmark_detect_mode, landmark_score=landmark_score, from_points=from_points)
 
         elif detect_mode=='Yolov8':
             if not self.yoloface_model:
-                self.yoloface_model = onnxruntime.InferenceSession('.\models\yoloface_8n.onnx', providers=self.providers)
+                self.yoloface_model = onnxruntime.InferenceSession('./models/yoloface_8n.onnx', providers=self.providers)
                 #self.insight106_model = onnxruntime.InferenceSession('./models/2d106det.onnx', providers=self.providers)
 
             bboxes, kpss = self.detect_yoloface(img, max_num=max_num, score=score, use_landmark_detection=use_landmark_detection, landmark_detect_mode=landmark_detect_mode, landmark_score=landmark_score, from_points=from_points)
 
         elif detect_mode=='Yunet':
             if not self.yunet_model:
-                self.yunet_model = onnxruntime.InferenceSession('.\models\yunet_n_640_640.onnx', providers=self.providers)
+                self.yunet_model = onnxruntime.InferenceSession('./models/yunet_n_640_640.onnx', providers=self.providers)
 
             bboxes, kpss = self.detect_yunet(img, max_num=max_num, score=score, use_landmark_detection=use_landmark_detection, landmark_detect_mode=landmark_detect_mode, landmark_score=landmark_score, from_points=from_points)
 
@@ -140,14 +140,14 @@ class Models():
 
         elif detect_mode=='68':
             if not self.face_landmark_68_model:
-                self.face_landmark_68_model = onnxruntime.InferenceSession('.\\models\\2dfan4.onnx', providers=self.providers)
+                self.face_landmark_68_model = onnxruntime.InferenceSession('./models/2dfan4.onnx', providers=self.providers)
 
             kpss, scores = self.detect_face_landmark_68(img, bbox=bbox, det_kpss=det_kpss, convert68_5=True, from_points=from_points)
 
         elif detect_mode=='3d68':
             if not self.face_landmark_3d68_model:
-                self.face_landmark_3d68_model = onnxruntime.InferenceSession('.\\models\\1k3d68.onnx', providers=self.providers)
-                with open('.\\models\\meanshape_68.pkl', 'rb') as f:
+                self.face_landmark_3d68_model = onnxruntime.InferenceSession('./models/1k3d68.onnx', providers=self.providers)
+                with open('./models/meanshape_68.pkl', 'rb') as f:
                     self.mean_lmk = pickle.load(f)
 
             kpss, scores = self.detect_face_landmark_3d68(img, bbox=bbox, det_kpss=det_kpss, convert68_5=True, from_points=from_points)
@@ -156,13 +156,13 @@ class Models():
 
         elif detect_mode=='98':
             if not self.face_landmark_98_model:
-                self.face_landmark_98_model = onnxruntime.InferenceSession('.\\models\\peppapig_teacher_Nx3x256x256.onnx', providers=self.providers)
+                self.face_landmark_98_model = onnxruntime.InferenceSession('./models/peppapig_teacher_Nx3x256x256.onnx', providers=self.providers)
 
             kpss, scores = self.detect_face_landmark_98(img, bbox=bbox, det_kpss=det_kpss, convert98_5=True, from_points=from_points)
 
         elif detect_mode=='106':
             if not self.face_landmark_106_model:
-                self.face_landmark_106_model = onnxruntime.InferenceSession('.\\models\\2d106det.onnx', providers=self.providers)
+                self.face_landmark_106_model = onnxruntime.InferenceSession('./models/2d106det.onnx', providers=self.providers)
 
             kpss, scores = self.detect_face_landmark_106(img, bbox=bbox, det_kpss=det_kpss, convert106_5=True, from_points=from_points)
 
@@ -170,10 +170,10 @@ class Models():
 
         elif detect_mode=='478':
             if not self.face_landmark_478_model:
-                self.face_landmark_478_model = onnxruntime.InferenceSession('.\\models\\face_landmarks_detector_Nx3x256x256.onnx', providers=self.providers)
+                self.face_landmark_478_model = onnxruntime.InferenceSession('./models/face_landmarks_detector_Nx3x256x256.onnx', providers=self.providers)
 
             if not self.face_blendshapes_model:
-                self.face_blendshapes_model = onnxruntime.InferenceSession('.\\models\\face_blendshapes_Nx146x2.onnx', providers=self.providers)
+                self.face_blendshapes_model = onnxruntime.InferenceSession('./models/face_blendshapes_Nx146x2.onnx', providers=self.providers)
 
             kpss, scores = self.detect_face_landmark_478(img, bbox=bbox, det_kpss=det_kpss, convert478_5=True, from_points=from_points)
 
@@ -212,11 +212,11 @@ class Models():
         self.occluder_model = []
         self.faceparser_model = []
 
-    def run_recognize(self, img, kps):
+    def run_recognize(self, img, kps, useOpalSimilarity=True):
         if not self.recognition_model:
-            self.recognition_model = onnxruntime.InferenceSession('.\models\w600k_r50.onnx', providers=self.providers)
+            self.recognition_model = onnxruntime.InferenceSession('./models/w600k_r50.onnx', providers=self.providers)
 
-        embedding, cropped_image = self.recognize(img, kps)
+        embedding, cropped_image = self.recognize(img, kps, useOpalSimilarity)
         return embedding, cropped_image
 
     def calc_swapper_latent(self, source_embedding):
@@ -1826,31 +1826,31 @@ class Models():
         #return landmark, landmark_score
         return landmark, []
 
-    def recognize(self, img, face_kps):
-        '''
-        # Find transform
-        dst = self.arcface_dst.copy()
-        dst[:, 0] += 8.0
+    def recognize(self, img, face_kps, useOpalSimilarity):
+        if not useOpalSimilarity:
+            # Find transform
+            dst = self.arcface_dst.copy()
+            dst[:, 0] += 8.0
 
-        tform = trans.SimilarityTransform()
-        tform.estimate(face_kps, dst)
+            tform = trans.SimilarityTransform()
+            tform.estimate(face_kps, dst)
 
-        # Transform
-        img = v2.functional.affine(img, tform.rotation*57.2958, (tform.translation[0], tform.translation[1]) , tform.scale, 0, center = (0,0) ) 
-        img = v2.functional.crop(img, 0,0, 128, 128)
-        img = v2.Resize((112, 112), interpolation=v2.InterpolationMode.BILINEAR, antialias=False)(img)
-        '''
-        # Find transform 
-        tform = trans.SimilarityTransform()
-        tform.estimate(face_kps, self.arcface_dst)
+            # Transform
+            img = v2.functional.affine(img, tform.rotation*57.2958, (tform.translation[0], tform.translation[1]) , tform.scale, 0, center = (0,0) ) 
+            img = v2.functional.crop(img, 0,0, 128, 128)
+            img = v2.Resize((112, 112), interpolation=v2.InterpolationMode.BILINEAR, antialias=False)(img)
+        else:
+            # Find transform 
+            tform = trans.SimilarityTransform()
+            tform.estimate(face_kps, self.arcface_dst)
 
-        # Transform
-        img = v2.functional.affine(img, tform.rotation*57.2958, (tform.translation[0], tform.translation[1]) , tform.scale, 0, center = (0,0) ) 
-        img = v2.functional.crop(img, 0,0, 112, 112)
+            # Transform
+            img = v2.functional.affine(img, tform.rotation*57.2958, (tform.translation[0], tform.translation[1]) , tform.scale, 0, center = (0,0) ) 
+            img = v2.functional.crop(img, 0,0, 112, 112)
 
-        cropped_image = img
         # Switch to BGR and normalize
         img = img.permute(1,2,0) #112,112,3
+        cropped_image = img
         img = img[:, :, [2,1,0]]
         img = torch.sub(img, 127.5)
         img = torch.div(img, 127.5)

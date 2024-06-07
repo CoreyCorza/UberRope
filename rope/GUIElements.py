@@ -79,11 +79,11 @@ class Scrollbar_y():
         self.trough_short_dim = 15
         self.trough_long_dim = []
         self.handle_short_dim = self.trough_short_dim*0.5
-        
+
         self.top_of_handle = []
         self.middle_of_handle = []
         self.bottom_of_handle = []
-        
+
         self.old_coord = 0
                 
         # Child data
@@ -113,7 +113,7 @@ class Scrollbar_y():
         x2 = self.trough_short_dim-x1
         y1 = self.child.yview()[0]*self.trough_long_dim
         y2 = self.child.yview()[1]*self.trough_long_dim
-  
+
         self.middle_of_handle = self.scrollbar_canvas.create_rectangle(x1, y1, x2, y2, fill='grey25', outline='')
 
     def scroll(self, event):
@@ -123,7 +123,7 @@ class Scrollbar_y():
         handle_y1 = self.scrollbar_canvas.coords(self.middle_of_handle)[1]
         handle_y2 = self.scrollbar_canvas.coords(self.middle_of_handle)[3]
         handle_center = (handle_y2-handle_y1)/2 + handle_y1
-        handle_length = handle_y2-handle_y1    
+        handle_length = handle_y2-handle_y1
 
         if event.type == '38': # mousewheel
             delta = -int(event.delta/20.0)
@@ -136,10 +136,10 @@ class Scrollbar_y():
                 self.old_coord = handle_center
 
             delta = event.y-self.old_coord
-  
+
         elif event.type == '6': # l-button drag
             delta = event.y-self.old_coord
-            
+
         # Do some bounding
         if handle_y1+delta<0:
             delta = -handle_y1
@@ -161,12 +161,12 @@ class Scrollbar_y():
         handle_y1 = self.scrollbar_canvas.coords(self.middle_of_handle)[1]
         handle_y2 = self.scrollbar_canvas.coords(self.middle_of_handle)[3]
         handle_center = (handle_y2-handle_y1)/2 + handle_y1
-        
+
         coord_del = self.scrollbar_canvas.winfo_height()*value-handle_center
         self.old_coord = self.scrollbar_canvas.winfo_height()*value
-        
+
         self.scrollbar_canvas.move(self.middle_of_handle, 0, coord_del)
-  
+
     def hide(self):
         pass
 
@@ -461,7 +461,7 @@ class Button():
     def error_button(self):
 
         self.button.configure(image=self.icon_off)
-        self.button.configure(fg='light goldenrod') 
+        self.button.configure(fg='light goldenrod')
         self.state = False 
         self.error = True
         
@@ -680,8 +680,7 @@ class Switch2():
     def on_enter(self):
         if self.info:
             self.info.configure(text=self.default_data[self.name+'InfoText'])
-     
-    
+
     def hide(self):
         self.switch_frame.place_forget()
         self.switch.place_forget()
@@ -705,7 +704,7 @@ class Switch2():
         self.set(self.default_data[self.name+'State'])        
                 
 class Slider2():
-    def __init__(self, parent, name, display_text, style_level, function, argument, width, height, x, y, slider_percent):
+    def __init__(self, parent, name, display_text, style_level, function, argument, width, height, x, y, slider_percent, entry_width=60):
 
         # self.constants = CONSTANTS
         self.default_data = DEFAULT_DATA
@@ -781,7 +780,8 @@ class Slider2():
         self.slider.bind('<MouseWheel>', lambda e: self.update_handle(e, True))         
 
         # Add the Entry to the frame
-        self.entry_width = 60
+        #self.entry_width = 60
+        self.entry_width = entry_width
         self.entry_x = self.frame_width-self.entry_width 
         self.entry_y = 0
 

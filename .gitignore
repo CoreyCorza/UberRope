@@ -1,0 +1,6 @@
+# Ignore folders
+models/
+venv/
+rope/__pycache__
+rope/external
+rope/media

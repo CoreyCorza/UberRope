@@ -18,6 +18,7 @@ torchvision.disable_beta_transforms_warning()
 from torchvision.transforms import v2
 torch.set_grad_enabled(False)
 onnxruntime.set_default_logger_severity(4)
+#from torchvision.utils import draw_bounding_boxes
 
 import inspect #print(inspect.currentframe().f_back.f_code.co_name, 'resize_image')
 
@@ -122,6 +123,10 @@ class VideoManager():
                             }   
         self.rec_qs = []
 
+        # Face Landmarks
+        self.face_landmarks = []
+        #
+        
     def assign_found_faces(self, found_faces):
         self.found_faces = found_faces
 
@@ -160,6 +165,12 @@ class VideoManager():
             temp = [crop, False]
             self.r_frame_q.append(temp)
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
+
+            # Face Landmarks
+            if self.face_landmarks:
+                self.face_landmarks.remove_all_data()
+                self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
+            #
     
     def load_target_image(self, file):
         if self.capture:
@@ -173,6 +184,12 @@ class VideoManager():
         self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB) # RGB
         temp = [self.image, False]
         self.frame_q.append(temp)
+
+        # Face Landmarks
+        if self.face_landmarks:
+            self.face_landmarks.remove_all_data()
+            self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
+        #
 
         self.is_image_loaded = True
 
@@ -216,21 +233,28 @@ class VideoManager():
             if self.play == True:            
                 self.play_video("stop")
                 self.process_qs = []
-                
+
+            # Face Landmarks
+            apply_landmarks = (self.current_frame != int(frame))
+            #
             self.current_frame = int(frame)
 
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame)
             success, target_image = self.capture.read() #BGR
 
             if success:
+                # Face Landmarks
+                if apply_landmarks and self.face_landmarks:
+                    self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
+                #
+                
                 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB) #RGB 
                 if not self.control['SwapFacesButton']:   
                     temp = [target_image, self.current_frame] #temp = RGB
                 else:
                     temp = [self.swap_video(target_image, self.current_frame, marker), self.current_frame] # temp = RGB
 
-                self.r_frame_q.append(temp)  
-        
+                self.r_frame_q.append(temp)
         elif self.is_image_loaded:
             if not self.control['SwapFacesButton']:
                 temp = [self.image, self.current_frame] # image = RGB
@@ -238,8 +262,7 @@ class VideoManager():
             else:  
                 temp = [self.swap_video(self.image, self.current_frame, False), self.current_frame] # image = RGB
             
-            self.r_frame_q.append(temp)  
-
+            self.r_frame_q.append(temp)
 
     def find_lowest_frame(self, queues):
         min_frame=999999999
@@ -502,8 +525,6 @@ class VideoManager():
                     break
 
 
-
-
     # @profile
     def swap_video(self, target_image, frame_number, use_markers):
         # Grab a local copy of the parameters to prevent threading issues
@@ -526,23 +547,34 @@ class VideoManager():
         #Scale up frame if it is smaller than 512
         img_x = img.size()[2]
         img_y = img.size()[1]
-        
+
+        det_scale = 1.0
         if img_x<512 and img_y<512:
             # if x is smaller, set x to 512
             if img_x <= img_y:
-                tscale = v2.Resize((int(512*img_y/img_x), 512), antialias=True)
+                new_height = int(512*img_y/img_x)
+                tscale = v2.Resize((new_height, 512), antialias=True)
             else:
-                tscale = v2.Resize((512, int(512*img_x/img_y)), antialias=True)
+                new_height = 512
+                tscale = v2.Resize((new_height, int(512*img_x/img_y)), antialias=True)
 
             img = tscale(img)
+
+            det_scale = torch.div(new_height, img_y)
             
         elif img_x<512:
-            tscale = v2.Resize((int(512*img_y/img_x), 512), antialias=True)
+            new_height = int(512*img_y/img_x)
+            tscale = v2.Resize((new_height, 512), antialias=True)
             img = tscale(img)
+
+            det_scale = torch.div(new_height, img_y)
         
         elif img_y<512:
-            tscale = v2.Resize((512, int(512*img_x/img_y)), antialias=True)
-            img = tscale(img)    
+            new_height = 512
+            tscale = v2.Resize((new_height, int(512*img_x/img_y)), antialias=True)
+            img = tscale(img)
+
+            det_scale = torch.div(new_height, img_y)
 
         # Rotate the frame
         if parameters['OrientSwitch']:
@@ -553,8 +585,28 @@ class VideoManager():
 
         # Get embeddings for all faces found in the frame
         ret = []
+        # Face Landmarks
+        face_id = 0
+        #
         for face_kps in kpss:
-            face_emb, _ = self.func_w_test('recognize',  self.models.run_recognize, img, face_kps)
+            # Face Landmarks
+            face_id+=1
+            if self.face_landmarks and parameters['LandmarksPositionAdjSwitch']:
+                landmarks = self.face_landmarks.get_landmarks(frame_number, face_id)
+                if landmarks is not None:                    
+                    face_kps[0][0] += landmarks[0][0]
+                    face_kps[0][1] += landmarks[0][1]
+                    face_kps[1][0] += landmarks[1][0]
+                    face_kps[1][1] += landmarks[1][1]
+                    face_kps[2][0] += landmarks[2][0]
+                    face_kps[2][1] += landmarks[2][1]
+                    face_kps[3][0] += landmarks[3][0]
+                    face_kps[3][1] += landmarks[3][1]
+                    face_kps[4][0] += landmarks[4][0]
+                    face_kps[4][1] += landmarks[4][1]
+            #
+
+            face_emb, _ = self.func_w_test('recognize',  self.models.run_recognize, img, face_kps, self.parameters["UseOpalSimilaritySwitch"])
             ret.append([face_kps, face_emb])
         
         if ret:
@@ -603,14 +655,21 @@ class VideoManager():
                 else:
                     p = 2
 
+                face_id = 0
                 for face in ret:
+                    face_id += 1
+                    if parameters['LandmarksPositionAdjSwitch'] and parameters['FaceIDSlider'] == face_id:
+                        kcolor = tuple((255, 0, 0))
+                    else:
+                        kcolor = tuple((0, 255, 255))
                     for kpoint in face[0]:
+                        kpoint = kpoint / det_scale
                         for i in range(-1, p):
                             for j in range(-1, p):
                                 try:
-                                    img[int(kpoint[1])+i][int(kpoint[0])+j][0] = 0
-                                    img[int(kpoint[1])+i][int(kpoint[0])+j][1] = 255
-                                    img[int(kpoint[1])+i][int(kpoint[0])+j][2] = 255
+                                    img[int(kpoint[1])+i][int(kpoint[0])+j][0] = kcolor[0]
+                                    img[int(kpoint[1])+i][int(kpoint[0])+j][1] = kcolor[1]
+                                    img[int(kpoint[1])+i][int(kpoint[0])+j][2] = kcolor[2]
                                 except:
                                     print("Key-points value {} exceed the image size {}.".format(kpoint, (img_x, img_y)))
                                     continue
@@ -666,7 +725,7 @@ class VideoManager():
         original_face_512 = v2.functional.affine(img, tform.rotation*57.2958, (tform.translation[0], tform.translation[1]) , tform.scale, 0, center = (0,0), interpolation=v2.InterpolationMode.BILINEAR )
         original_face_512 = v2.functional.crop(original_face_512, 0,0, 512, 512)# 3, 512, 512
         original_face_256 = t256(original_face_512)
-        original_face_128 = t128(original_face_512)
+        original_face_128 = t128(original_face_256)
 
         latent = torch.from_numpy(self.models.calc_swapper_latent(s_e)).float().to('cuda')
 
